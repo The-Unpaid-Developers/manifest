@@ -18,6 +18,8 @@ permissions:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_DYNAMODB_TABLE: ${{ secrets.AWS_DYNAMODB_TABLE }}
+  TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+  TF_VAR_iam_user_name: ${{ secrets.IAM_USER_NAME }}
 jobs:
   plan:
     runs-on: ubuntu-latest
