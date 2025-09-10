@@ -1,4 +1,5 @@
 terraform {
+  backend "s3" {}
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -6,7 +7,7 @@ terraform {
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "= 2.16.1"
+      version = ">= 2.16.1"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -21,21 +22,25 @@ provider "aws" {
 }
 
 # allow terraform to authenticate helm with the EKS cluster
+data "aws_eks_cluster" "cluster" {
+  name = module.eks.unpaid_developers_singapore_eks_cluster_id
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks.unpaid_developers_singapore_eks_cluster_id
+}
+
 provider "helm" {
-  kubernetes {
-    host                   = module.eks.unpaid_developers_singapore_eks_cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.unpaid_developers_singapore_eks_cluster_certificate_authority_data)
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.unpaid_developers_singapore_eks_cluster_id, "--region", "ap-southeast-1"]
-      command     = "aws"
-    }
+  kubernetes = {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.cluster.token
   }
 }
 
 # define kubeconfig for kubectl
 provider "kubernetes" {
-  host                   = module.eks.unpaid_developers_singapore_eks_cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.unpaid_developers_singapore_eks_cluster_certificate_authority_data)
-  token                  = module.eks.unpaid_developers_singapore_eks_cluster_token
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
 }
