@@ -1,0 +1,19 @@
+admissionController:
+  tracing:
+    # enable tracing
+    enabled: false
+
+backgroundController:
+  tracing:
+    # enable tracing
+    enabled: false
+
+cleanupController:
+  tracing:
+    # enable tracing
+    enabled: false
+
+reportsController:
+  tracing:
+    # enable tracing
+    enabled: false

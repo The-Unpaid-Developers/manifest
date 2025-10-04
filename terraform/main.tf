@@ -25,6 +25,30 @@ module "kubernetes" {
   iam_user_name                        = var.iam_user_name
 }
 
+module "karpenter" {
+  source = "./modules/kubernetes/karpenter"
+
+  unpaid_developers_singapore_eks_oidc_url         = module.eks.unpaid_developers_singapore_eks_oidc_url
+  unpaid_developers_singapore_eks_oidc_arn         = module.eks.unpaid_developers_singapore_eks_oidc_arn
+  unpaid_developers_eks_nodes_role_name            = module.eks.unpaid_developers_eks_nodes_role_name
+  unpaid_developers_singapore_eks_cluster_id       = module.eks.unpaid_developers_singapore_eks_cluster_id
+  unpaid_developers_singapore_eks_cluster_endpoint = module.eks.unpaid_developers_singapore_eks_cluster_endpoint
+}
+
+module "argocd" {
+  source = "./modules/kubernetes/argocd"
+}
+
+module "istio" {
+  source = "./modules/kubernetes/istio"
+
+  unpaid_developers_singapore_eks_cluster_name = module.eks.unpaid_developers_singapore_eks_cluster_name
+}
+
 module "metrics_server" {
   source = "./modules/kubernetes/metrics_server"
+}
+
+module "kyverno" {
+  source = "./modules/kubernetes/kyverno"
 }
