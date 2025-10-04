@@ -21,6 +21,10 @@ module "kubernetes" {
 
   # for IAM to access EKS
   unpaid_developers_eks_nodes_role_arn = module.eks.unpaid_developers_eks_nodes_role_arn
-  aws_account_id                 = var.aws_account_id
-  iam_user_name                  = var.iam_user_name
+  aws_account_id                       = var.aws_account_id
+  iam_user_name                        = var.iam_user_name
+}
+
+module "metrics_server" {
+  source = "./modules/kubernetes/metrics_server"
 }
