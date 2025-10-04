@@ -40,9 +40,7 @@ spec:
   - "argocd.bchewy.com"
   - "kibana.bchewy.com"
   - "grafana.bchewy.com"
-  - "jaeger.bchewy.com"
   - "kiali.bchewy.com"
-  - "temporal.bchewy.com"
   gateways:
   - fyp/application-gateway
   http:
