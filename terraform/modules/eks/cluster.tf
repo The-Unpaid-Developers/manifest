@@ -2,26 +2,26 @@
 # tfsec:ignore:aws-eks-no-public-cluster-access
 # tfsec:ignore:aws-eks-no-public-cluster-access-to-cidr
 resource "aws_eks_cluster" "unpaid_developers_singapore_eks_cluster" {
-  name     = "unpaid-developers-singapore-eks-cluster"
+  name = "unpaid-developers-singapore-eks-cluster"
 
   #checkov:skip=CKV_AWS_339: Newest version as specified by AWS
-  version = "1.31"
+  version = var.eks_cluster_version
 
   # ARN of the IAM role that the EKS cluster will assume
   role_arn = aws_iam_role.unpaid_developers_eks_cluster_role.arn
 
   # Configure encryption for Kubernetes secrets using KMS
   encryption_config {
-    resources = [ "secrets" ]
+    resources = ["secrets"]
     provider {
-        key_arn = var.eks_kms_key_arn
+      key_arn = var.eks_kms_key_arn
     }
   }
   # Configuration related to the VPC
   #checkov:skip=CKV_AWS_38: To enable kubectl access to the cluster, the public access is required
   #checkov:skip=CKV_AWS_39: To enable kubectl access to the cluster, the public access is required
   vpc_config {
-    
+
     subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
 
     # # Disable public and enable private access to the EKS Kubernetes API server

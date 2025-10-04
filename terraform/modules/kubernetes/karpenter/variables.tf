@@ -22,3 +22,8 @@ variable "unpaid_developers_singapore_eks_cluster_endpoint" {
   description = "Endpoint of the EKS cluster"
   type        = string
 }
+
+variable "karpenter_chart_version" {
+  description = "Karpenter Helm chart version"
+  type        = string
+}
