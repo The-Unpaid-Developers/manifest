@@ -1,0 +1,35 @@
+---
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: default
+spec:
+  ttlSecondsAfterEmpty: 60            # The amount of time to wait before terminating an empty node
+  ttlSecondsUntilExpired: 604800      # The amount of time to wait before terminating an deleting a node 
+                                      # that has been running for a long time
+  limits:
+    resources:
+      cpu: 4000                        # Specify CPU limits for the provisioned nodes
+
+  requirements:
+    # Specify instance families of EC2 instances to include in the provisioner
+    - key: karpenter.k8s.aws/instance-family
+      operator: In
+      values: [t3, t4] # Include only x86 families
+
+    # Specify instance sizes of EC2 instances to include in the provisioner
+    - key: karpenter.k8s.aws/instance-size
+      operator: In
+      values: [medium, large, xlarge, 2xlarge]
+  providerRef:
+    name: my-provider
+---
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: my-provider
+spec:
+  subnetSelector:
+    kubernetes.io/cluster/unpaid-developers-singapore-eks-cluster: owned
+  securityGroupSelector:
+    kubernetes.io/cluster/unpaid-developers-singapore-eks-cluster: owned

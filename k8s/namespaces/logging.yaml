@@ -1,0 +1,8 @@
+# define the logging namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+  labels:
+    monitoring: prometheus
+    istio-injection: enabled

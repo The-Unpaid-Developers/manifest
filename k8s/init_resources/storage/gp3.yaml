@@ -1,0 +1,8 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+provisioner: ebs.csi.aws.com # This is the key for the AWS EBS CSI Driver
+parameters:
+  type: gp3
+  encrypted: "true"

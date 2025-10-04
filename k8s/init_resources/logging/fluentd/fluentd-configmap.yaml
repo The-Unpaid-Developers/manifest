@@ -1,0 +1,158 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: logging
+  labels:
+    k8s-app: fluentd-logging
+data:
+  fluent.conf: |-
+    @include containers.conf
+    @include host.conf
+
+    <label @FLUENT_LOG>
+      <match **>
+        @type null
+      </match>
+    </label>
+
+  containers.conf: |-
+    <source>
+      @type tail
+      @id in_tail_container_logs
+      @label @containers
+      path /var/log/containers/*.log
+      exclude_path ["/var/log/containers/fluentd*",
+                    "/var/log/containers/efs-csi-node-*",
+                    "/var/log/containers/ebs-snapshot-controller-*",
+                    "/var/log/containers/ebs-csi-controller-*",
+                    "/var/log/containers/kafka-*"]
+      pos_file /var/log/fluentd-k8s-containers.pos
+      tag *
+      read_from_head true
+      <parse>
+        @type regexp
+        expression /^(?<time>[^\s]+) (?<stream>stdout|stderr) F (?<log>.*)$/
+        time_format %Y-%m-%dT%H:%M:%S.%NZ
+      </parse>
+    </source>
+
+    <label @containers>
+      <filter **>
+        @type kubernetes_metadata
+        @id filter_kube_metadata
+      </filter>
+
+      <filter **>
+        @type record_transformer
+        enable_ruby true
+        <record>
+          kubernetes {
+            "container_image": "${record.dig('kubernetes', 'container_image') || 'nil'}",
+            "container_image_id": "${record.dig('kubernetes', 'container_image_id') || 'nil'}",
+            "container_name": "${record.dig('kubernetes', 'container_name') || 'nil'}",
+            "host": "${record.dig('kubernetes', 'host') || 'nil'}",
+            "labels": {
+              "app": "${record.dig('kubernetes', 'labels', 'app.kubernetes.io/name') || 'nil'}",
+              "pod-template-hash": "${record.dig('kubernetes', 'labels', 'pod-template-hash') || 'nil'}",
+              "security.istio.io/tlsMode": "${record.dig('kubernetes', 'labels', 'security.istio.io/tlsMode') || 'nil'}",
+              "service.istio.io/canonical-name": "${record.dig('kubernetes', 'labels', 'service.istio.io/canonical-name') || 'nil'}",
+              "service.istio.io/canonical-revision": "${record.dig('kubernetes', 'labels', 'service.istio.io/canonical-revision') || 'nil'}"
+            },
+            "namespace_labels": {
+              "istio-injection": "${record.dig('kubernetes', 'namespace_labels', 'istio-injection') || 'nil'}",
+              "kubernetes.io/metadata.name": "${record.dig('kubernetes', 'namespace_labels', 'kubernetes.io/metadata.name') || 'nil'}",
+              "monitoring": "${record.dig('kubernetes', 'namespace_labels', 'monitoring') || 'nil'}"
+            },
+            "master_url": "${record.dig('kubernetes', 'master_url') || 'nil'}",
+            "namespace_id": "${record.dig('kubernetes', 'namespace_id') || 'nil'}",
+            "namespace_name": "${record.dig('kubernetes', 'namespace_name') || 'nil'}",
+            "pod_id": "${record.dig('kubernetes', 'pod_id') || 'nil'}",
+            "pod_ip": "${record.dig('kubernetes', 'pod_ip') || 'nil'}",
+            "pod_name": "${record.dig('kubernetes', 'pod_name') || 'nil'}"
+          }
+        </record>
+      </filter>
+
+      <match **>
+        @type elasticsearch
+        host "#{ENV['FLUENT_ELASTICSEARCH_HOST'] || 'elasticsearch.logging'}"
+        port "#{ENV['FLUENT_ELASTICSEARCH_PORT'] || '9200'}"
+        user "#{ENV['FLUENT_ELASTICSEARCH_USER']}"
+        password "#{ENV['FLUENT_ELASTICSEARCH_PASSWORD']}"
+        scheme "#{ENV['FLUENT_ELASTICSEARCH_SCHEME'] || 'http'}"
+        ssl_verify "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERIFY'] || 'false'}"
+        ssl_version "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERSION'] || 'TLSv1_2'}"
+        index_name fluentd-containers-k8s
+        type_name fluentd
+        include_timestamp true
+        <buffer>
+          @type memory
+          flush_interval 10s
+          retry_max_times 5
+          overflow_action block
+        </buffer>
+      </match>
+    </label>
+
+  host.conf: |-
+    <source>
+      @type tail
+      @id in_tail_dmesg
+      @label @hostlogs
+      path /var/log/dmesg
+      tag host.dmesg
+      read_from_head true
+      pos_file /var/log/fluentd-system-dmesg.pos
+      <parse>
+        @type syslog
+      </parse>
+    </source>
+
+    <source>
+      @type tail
+      @id in_tail_secure
+      @label @hostlogs
+      path /var/log/secure
+      tag host.secure
+      read_from_head true
+      pos_file /var/log/fluentd-system-secure.pos
+      <parse>
+        @type syslog
+      </parse>
+    </source>
+
+    <source>
+      @type tail
+      @id in_tail_messages
+      @label @hostlogs
+      path /var/log/messages
+      tag host.messages
+      read_from_head true
+      pos_file /var/log/fluentd-system-messages.pos
+      <parse>
+        @type syslog
+      </parse>
+    </source>
+
+    <label @hostlogs>
+      <match host.**>
+        @type elasticsearch
+        host "#{ENV['FLUENT_ELASTICSEARCH_HOST'] || 'elasticsearch.logging'}"
+        port "#{ENV['FLUENT_ELASTICSEARCH_PORT'] || '9200'}"
+        user "#{ENV['FLUENT_ELASTICSEARCH_USER']}"
+        password "#{ENV['FLUENT_ELASTICSEARCH_PASSWORD']}"
+        ssl_verify "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERIFY'] || 'false'}"
+        ssl_version "#{ENV['FLUENT_ELASTICSEARCH_SSL_VERSION'] || 'TLSv1_2'}"
+        index_name fluentd-host-k8s
+        type_name fluentd
+        scheme "#{ENV['FLUENT_ELASTICSEARCH_SCHEME'] || 'http'}"
+        include_timestamp true
+        <buffer>
+          @type memory
+          flush_interval 10s
+          retry_max_times 5
+          overflow_action block
+        </buffer>
+      </match>
+    </label>

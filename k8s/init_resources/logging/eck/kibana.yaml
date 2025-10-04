@@ -1,0 +1,22 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: kibana
+  namespace: logging
+spec:
+  version: 8.13.1
+  count: 3
+  elasticsearchRef:
+    name: elasticsearch-cluster
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  config:
+    csp.warnLegacyBrowsers: false
+    xpack.security.secureCookies: true
+    xpack.security.sameSiteCookies: "None"
+
+  podTemplate:
+    spec:
+      automountServiceAccountToken: true
