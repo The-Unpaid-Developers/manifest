@@ -8,7 +8,7 @@ resource "helm_release" "istio_base" {
   chart            = "base"
   namespace        = "istio-system"
   create_namespace = true
-  version          = "1.21.0"
+  version          = var.istio_chart_version
 
   values = [
     yamlencode({

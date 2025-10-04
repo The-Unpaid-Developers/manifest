@@ -12,3 +12,8 @@ variable "eks_kms_key_arn" {
   description = "ARN of the KMS key used to encrypt secrets in EKS"
   type        = string
 }
+
+variable "eks_cluster_version" {
+  description = "EKS Kubernetes cluster version"
+  type        = string
+}
