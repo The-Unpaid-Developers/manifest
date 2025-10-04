@@ -1,4 +1,4 @@
-namespace: cs302
+namespace: fyp
 images: 
 - name: smithquaz/fyp-core-service
   newTag: "v1.0.0"
