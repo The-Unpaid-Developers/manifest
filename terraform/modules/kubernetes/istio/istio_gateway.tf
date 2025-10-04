@@ -42,7 +42,7 @@ resource "time_sleep" "wait_for_ingressgateway" {
 
 data "kubernetes_service" "istio_ingressgateway" {
   metadata {
-    name      = "unpaid-developers-singapore-istio-ingressgateway"
+    name      = "istio-ingressgateway"
     namespace = "istio-ingress"
   }
 
