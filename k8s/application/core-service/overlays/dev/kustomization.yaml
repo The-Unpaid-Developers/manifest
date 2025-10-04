@@ -1,0 +1,6 @@
+namespace: cs302
+images: 
+- name: smithquaz/fyp-core-service
+  newTag: "v1.0.0"
+resources:
+  - ../../base

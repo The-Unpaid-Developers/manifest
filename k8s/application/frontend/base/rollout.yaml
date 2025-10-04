@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: frontend-rollout
+  namespace: fyp
+spec:
+  replicas: 3
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+
+        # this label needs to be hard coded to the pod spec as kustomize will not patch custom resources
+        # ref: https://github.com/kubernetes-sigs/kustomize/discussions/5496
+        app.kubernetes.io/name: frontend
+        # There is an addition 'version' label which will be added by 'canaryMetadata' and 'stableMetadata'
+    spec:
+      terminationGracePeriodSeconds: 3
+      containers:
+      - name: frontend
+        imagePullPolicy: Always
+        image: smithquaz/fyp-frontend:v1.0.0
+        resources:
+          limits:
+            memory: "800Mi"
+            cpu: "800m"
+          requests:
+            memory: "500Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3000
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: { duration: 20s }
+      - setWeight: 40
+      - pause: { duration: 20s }
+      - setWeight: 60
+      - pause: { duration: 20s }
+      - setWeight: 80
+      - pause: { duration: 20s }
+      - setWeight: 100
+      # traffic routing using istio subset
+      canaryService: frontend-canary
+      stableService: frontend-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: application-virtualservice # points to path based routing virtual service
+            routes:
+            - frontend-route # Name of the route to be used
+            # TODO: add a HTTPS route
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-stable
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-canary
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP

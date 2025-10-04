@@ -5,7 +5,7 @@ metadata:
   namespace: argocd # namespace where argocd is deployed
   annotations:
     # only update upon every change in the image
-    argocd-image-updater.argoproj.io/image-list: smithquaz/fyp-frontend:*
+    argocd-image-updater.argoproj.io/image-list: smithquaz/fyp-core-service:*
 
     # allow image updater to make a commit to the git repository
     argocd-image-updater.argoproj.io/write-back-method: git
@@ -25,7 +25,7 @@ spec:
   source:
     repoURL: git@github.com:The-Unpaid-Developers/manifest.git
     targetRevision: main
-    path: k8s/application/frontend/overlays/dev # name of the directory in the git repository
+    path: k8s/application/core-service/overlays/dev # name of the directory in the git repository
 
   # sync policy and where argocd is deploying to (currently to itself)
   # sync policy is automated and will prune and self-heal
