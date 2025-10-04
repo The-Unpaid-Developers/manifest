@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: frontend
+  name: core-service
   namespace: argocd # namespace where argocd is deployed
   annotations:
     # only update upon every change in the image
