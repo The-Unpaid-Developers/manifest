@@ -1,35 +1,19 @@
 admissionController:
   tracing:
     # enable tracing
-    enabled: true
-    # jaeger backend url
-    address: jaeger-collector.istio-system
-    # jaeger backend port for opentelemetry traces
-    port: 4317
+    enabled: false
 
 backgroundController:
   tracing:
     # enable tracing
-    enabled: true
-    # jaeger backend url
-    address: jaeger-collector.istio-system
-    # jaeger backend port for opentelemetry traces
-    port: 4317
+    enabled: false
 
 cleanupController:
   tracing:
     # enable tracing
-    enabled: true
-    # jaeger backend url
-    address: jaeger-collector.istio-system
-    # jaeger backend port for opentelemetry traces
-    port: 4317
+    enabled: false
 
 reportsController:
   tracing:
     # enable tracing
-    enabled: true
-    # jaeger backend url
-    address: jaeger-collector.istio-system
-    # jaeger backend port for opentelemetry traces
-    port: 4317
+    enabled: false
