@@ -7,5 +7,5 @@ resource "helm_release" "prometheus_operator" {
   create_namespace = true
 
   # overwrite values
-  values = [file("modules/kubernetes/operations/values/custom_config.yaml")]
+  values = [file("${path.module}/values/custom_config.yaml")]
 }

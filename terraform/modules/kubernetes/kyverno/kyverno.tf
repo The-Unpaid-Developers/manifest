@@ -14,7 +14,6 @@ resource "helm_release" "kyverno" {
     yamlencode({
       replicaCount = 1
     }),
-    file("modules/kubernetes/kyverno/values/tracing.yaml")
+    file("${path.module}/values/tracing.yaml")
   ]
-
 }

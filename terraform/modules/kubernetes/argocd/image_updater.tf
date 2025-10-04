@@ -9,5 +9,5 @@ resource "helm_release" "updater" {
   create_namespace = true
   version          = "0.8.4"
 
-  values = [file("modules/kubernetes/argocd/values/image-updater.yaml")]
+  values = [file("${path.module}/values/image-updater.yaml")]
 }

@@ -9,5 +9,5 @@ resource "helm_release" "argocd" {
   version          = "5.46.8"
 
   # overwrite values
-  values = [file("modules/kubernetes/argocd/values/argocd.yaml")]
+  values = [file("${path.module}/values/argocd.yaml")]
 }

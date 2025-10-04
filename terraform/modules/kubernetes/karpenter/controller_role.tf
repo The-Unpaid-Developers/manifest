@@ -22,7 +22,7 @@ resource "aws_iam_role" "unpaid_developers_karpenter_controller_role" {
 }
 
 resource "aws_iam_policy" "unpaid_developers_karpenter_controller_policy" {
-  policy = file("./modules/kubernetes/karpenter/controller_trust_policy.json")
+  policy = file("${path.module}/controller_trust_policy.json")
   name   = "KarpenterController"
 }
 
