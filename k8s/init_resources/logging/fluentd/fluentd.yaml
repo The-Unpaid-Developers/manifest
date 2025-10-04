@@ -23,6 +23,13 @@ spec:
       - name: copy-fluentd-config
         image: busybox
         command: [ 'sh', '-c', 'cp /config-volume/..data/* /fluentd/etc' ]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
         volumeMounts:
         - name: config-volume
           mountPath: /config-volume
@@ -62,10 +69,11 @@ spec:
         - name: FLUENT_CONTAINER_TAIL_EXCLUDE_PATH
           value: '["/var/log/containers/fluentd*", "/var/log/containers/efs-csi-node*", "/var/log/containers/ebs-snapshot-controller*", "/var/log/containers/ebs-csi-controller*", "/var/log/containers/kafka*", "/var/log/containers/elasticsearch*"]'
         resources:
-          limits:
-            memory: 200Mi
           requests:
             cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 200m
             memory: 200Mi
         volumeMounts:
         - name: config-volume
