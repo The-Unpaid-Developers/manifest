@@ -33,6 +33,9 @@ spec:
             cpu: "500m"
         ports:
         - containerPort: 8080
+        env:
+          # Don't set this in prod, use a secret instead
+          - CONN_STR: mongodb+srv://yuchen1310_db_user:JAYMCbIjBSQBcmEg@cluster0.rgod43r.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
   strategy:
     canary:
       steps:

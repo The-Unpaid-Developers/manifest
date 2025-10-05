@@ -1,13 +1,13 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: core-service-hpa
+  name: proxy-service-hpa
   namespace: fyp
 spec:
   scaleTargetRef:
     apiVersion: argoproj.io/v1alpha1
     kind: Rollout
-    name: core-service-rollout
+    name: proxy-service-rollout
   minReplicas: 1
   maxReplicas: 5
   metrics:
