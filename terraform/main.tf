@@ -14,6 +14,12 @@ module "eks" {
   public_subnet_ids   = module.network.public_subnet_ids
   eks_kms_key_arn     = module.kms.eks_kms_key_arn
   eks_cluster_version = var.eks_cluster_version
+
+  # GPU node group configuration
+  gpu_instance_types = var.gpu_instance_types
+  gpu_desired_size   = var.gpu_desired_size
+  gpu_min_size       = var.gpu_min_size
+  gpu_max_size       = var.gpu_max_size
 }
 
 # Kubernetes related resources

@@ -1,0 +1,40 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: chatbot-service-hpa
+  namespace: fyp
+spec:
+  scaleTargetRef:
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: chatbot-service-rollout
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70 # Lower threshold for GPU workloads
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 75
+  behavior:
+    # Scale down slowly to avoid churning expensive GPU nodes
+    scaleDown:
+      stabilizationWindowSeconds: 600 # Wait 10 minutes before scaling down
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 600 # Remove 1 pod every 10 minutes max
+    # Scale up faster to handle GPU workload spikes
+    scaleUp:
+      stabilizationWindowSeconds: 60 # Quick response to increased load
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 60 # Add up to 2 pods per minute
