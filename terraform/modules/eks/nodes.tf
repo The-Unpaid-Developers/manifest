@@ -45,8 +45,8 @@ resource "aws_eks_node_group" "unpaid_developers_singapore_gpu_nodes" {
     var.private_subnet_ids[1]
   ]
 
-  # Use EKS-optimized AMI with GPU support (AL2 with NVIDIA drivers)
-  ami_type = "AL2_x86_64_GPU"
+  # Use EKS-optimized AMI with GPU support (AL2023 with NVIDIA drivers)
+  ami_type = "AL2023_x86_64_NVIDIA"
 
   # GPU instance types - g4dn for cost-effective GPU workloads
   instance_types = var.gpu_instance_types
@@ -64,9 +64,9 @@ resource "aws_eks_node_group" "unpaid_developers_singapore_gpu_nodes" {
   }
 
   labels = {
-    role         = "gpu"
-    workload     = "gpu-compute"
-    gpu-enabled  = "true"
+    role        = "gpu"
+    workload    = "gpu-compute"
+    gpu-enabled = "true"
   }
 
   # Taint GPU nodes so only GPU workloads with tolerations can be scheduled
