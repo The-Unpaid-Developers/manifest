@@ -15,7 +15,7 @@ spec:
   config:
     csp.warnLegacyBrowsers: false
     xpack.security.secureCookies: false
-    xpack.security.sameSiteCookies: "None"
+    xpack.security.sameSiteCookies: "Lax"
 
   podTemplate:
     spec:
