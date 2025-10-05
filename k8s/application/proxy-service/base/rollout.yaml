@@ -34,7 +34,7 @@ spec:
         - containerPort: 8000
         env:
         - name: CORE_SERVICE_URL
-          value: proxy-service:8000
+          value: core-service:8000
         - name: DIAGRAM_SERVICE_URL
           value: diagram-service:8081
         - name: CHATBOT_SERVICE_URL

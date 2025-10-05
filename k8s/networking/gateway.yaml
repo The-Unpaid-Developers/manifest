@@ -173,3 +173,19 @@ spec:
         port:
           number: 8080
       weight: 0 # Initial weight
+
+  - name: proxy-service-route # matched to proxy-service rollout
+    match:
+    - uri:
+        prefix: "/proxy-service/"
+    route:
+    - destination:
+        host: proxy-service-stable.fyp.svc.cluster.local
+        port:
+          number: 8080
+      weight: 100 # Initial weight
+    - destination:
+        host: proxy-service-canary.fyp.svc.cluster.local
+        port:
+          number: 8080
+      weight: 0 # Initial weight
