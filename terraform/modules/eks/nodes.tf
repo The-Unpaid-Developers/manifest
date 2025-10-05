@@ -9,7 +9,6 @@ resource "aws_eks_node_group" "unpaid_developers_singapore_nodes" {
     var.private_subnet_ids[1]
   ]
 
-  # commented out for presentation purposes
   # capacity_type  = "SPOT"
   instance_types = ["t3.2xlarge"]
 
@@ -18,7 +17,7 @@ resource "aws_eks_node_group" "unpaid_developers_singapore_nodes" {
   scaling_config {
     desired_size = 4
     max_size     = 7
-    min_size     = 0
+    min_size     = 1
   }
 
   update_config {

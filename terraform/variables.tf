@@ -55,7 +55,7 @@ variable "metrics_server_chart_version" {
 variable "gpu_instance_types" {
   description = "List of GPU instance types for the GPU node group"
   type        = list(string)
-  default     = ["g4dn.xlarge"] # Cost-effective GPU instance, ~$0.526/hr
+  default     = ["g4dn.2xlarge"]
 }
 
 variable "gpu_desired_size" {
