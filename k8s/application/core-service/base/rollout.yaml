@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: core-service-rollout
+  namespace: fyp
+spec:
+  replicas: 3
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: core-service
+  template:
+    metadata:
+      labels:
+        app: core-service
+
+        # this label needs to be hard coded to the pod spec as kustomize will not patch custom resources
+        # ref: https://github.com/kubernetes-sigs/kustomize/discussions/5496
+        app.kubernetes.io/name: core-service
+        # There is an addition 'version' label which will be added by 'canaryMetadata' and 'stableMetadata'
+    spec:
+      terminationGracePeriodSeconds: 3
+      containers:
+      - name: core-service
+        imagePullPolicy: Always
+        image: smithquaz/fyp-core-service:v1.0.0
+        resources:
+          limits:
+            memory: "800Mi"
+            cpu: "800m"
+          requests:
+            memory: "500Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: { duration: 20s }
+      - setWeight: 40
+      - pause: { duration: 20s }
+      - setWeight: 60
+      - pause: { duration: 20s }
+      - setWeight: 80
+      - pause: { duration: 20s }
+      - setWeight: 100
+      # traffic routing using istio subset
+      canaryService: core-service-canary
+      stableService: core-service-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: application-virtualservice # points to path based routing virtual service
+            routes:
+            - core-service-route # Name of the route to be used
+            # TODO: add a HTTPS route
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-service-stable
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: core-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-service-canary
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: core-service
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP

@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: fyp-project
+  namespace: argocd
+spec:
+  description: App project for FYP
+
+  sourceRepos:
+    - git@github.com:The-Unpaid-Developers/manifest.git
+
+  destinations:
+  - namespace: '*'
+    server: 'https://kubernetes.default.svc'
+
+  # we need to this allow argocd to create cluster wide policies
+  clusterResourceWhitelist:
+  - group: "*"
+    kind: "*"

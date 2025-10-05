@@ -1,0 +1,175 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: application-gateway
+  namespace: fyp
+spec:
+  selector:
+    istio: unpaid-developers-singapore-istio-gateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: bchewy-zerossl-tls-secret
+    hosts:
+    - "*"
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "fyp.bchewy.com"
+    - "argocd.bchewy.com"
+    - "kibana.bchewy.com"
+    - "grafana.bchewy.com"
+    - "kiali.bchewy.com"
+---
+
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: application-virtualservice
+  namespace: fyp
+spec:
+  # this specifies the hosts where the virtual service will be applied
+  hosts:
+  - "fyp.bchewy.com"
+  - "argocd.bchewy.com"
+  - "kibana.bchewy.com"
+  - "grafana.bchewy.com"
+  - "kiali.bchewy.com"
+  gateways:
+  - fyp/application-gateway
+  http:
+  # Domain-based routing for internal tools
+  - name: argocd-route
+    match:
+    - authority:
+        exact: argocd.bchewy.com
+    route:
+    - destination:
+        host: argocd-server.argocd.svc.cluster.local
+        port:
+          number: 80
+  - name: kibana-route
+    match:
+    - authority:
+        exact: kibana.bchewy.com
+    route:
+    - destination:
+        host: kibana-kb-http.logging.svc.cluster.local
+        port:
+          number: 5601
+  - name: grafana-route
+    match:
+    - authority:
+        exact: grafana.bchewy.com
+    route:
+    - destination:
+        host: grafana.istio-system.svc.cluster.local
+        port:
+          number: 3000
+  - name: kiali-route
+    match:
+    - authority:
+        exact: kiali.bchewy.com
+    route:
+    - destination:
+        host: kiali.istio-system.svc.cluster.local
+        port:
+          number: 20001
+
+  # # Path-based routing for main application
+  # - name: auth-route # matched to auth rollout
+  #   match:
+  #   - uri:
+  #       prefix: "/auth/"
+  #   route:
+  #   - destination:
+  #       host: auth-stable.fyp.svc.cluster.local
+  #       port:
+  #         number: 8080
+  #     weight: 100 # Initial weight
+  #   - destination:
+  #       host: auth-canary.fyp.svc.cluster.local
+  #       port:
+  #         number: 8080
+  #     weight: 0 # Initial weight
+  # - name: ticketing-route # matched to ticketing rollout
+  #   match:
+  #   - uri:
+  #       prefix: "/ticketing/"
+  #   route:
+  #   - destination:
+  #       host: ticketing-stable.fyp.svc.cluster.local
+  #       port:
+  #         number: 8081
+  #     weight: 100 # Initial weight
+  #   - destination:
+  #       host: ticketing-canary.fyp.svc.cluster.local
+  #       port:
+  #         number: 8081
+  #     weight: 0 # Initial weight
+  # - name: payment-route # matched to payment rollout
+  #   match:
+  #   - uri:
+  #       prefix: "/payment/"
+  #   route:
+  #   - destination:
+  #       host: payment-stable.fyp.svc.cluster.local
+  #       port:
+  #         number: 8082
+  #     weight: 100 # Initial weight
+  #   - destination:
+  #       host: payment-canary.fyp.svc.cluster.local
+  #       port:
+  #         number: 8082
+  #     weight: 0 # Initial weight
+  # - name: queue-route # matched to queue rollout
+  #   match:
+  #   - uri:
+  #       prefix: "/queue/"
+  #   route:
+  #   - destination:
+  #       host: queue-stable.fyp.svc.cluster.local
+  #       port:
+  #         number: 8500
+  #     weight: 100 # Initial weight
+  #   - destination:
+  #       host: queue-canary.fyp.svc.cluster.local
+  #       port:
+  #         number: 8500
+  #     weight: 0 # Initial weight
+  - name: frontend-route # matched to frontend rollout
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: frontend-stable.fyp.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100 # Initial weight
+    - destination:
+        host: frontend-canary.fyp.svc.cluster.local
+        port:
+          number: 3000
+      weight: 0 # Initial weight
+  - name: core-service-route # matched to core-service rollout
+    match:
+    - uri:
+        prefix: "/core-service/"
+    route:
+    - destination:
+        host: core-service-stable.fyp.svc.cluster.local
+        port:
+          number: 8080
+      weight: 100 # Initial weight
+    - destination:
+        host: core-service-canary.fyp.svc.cluster.local
+        port:
+          number: 8080
+      weight: 0 # Initial weight
