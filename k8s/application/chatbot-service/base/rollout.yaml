@@ -1,0 +1,122 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: chatbot-service-rollout
+  namespace: fyp
+spec:
+  replicas: 2
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: chatbot-service
+  template:
+    metadata:
+      labels:
+        app: chatbot-service
+
+        # this label needs to be hard coded to the pod spec as kustomize will not patch custom resources
+        # ref: https://github.com/kubernetes-sigs/kustomize/discussions/5496
+        app.kubernetes.io/name: chatbot-service
+        # There is an addition 'version' label which will be added by 'canaryMetadata' and 'stableMetadata'
+    spec:
+      terminationGracePeriodSeconds: 30
+
+      # Tolerations to allow scheduling on GPU nodes with taints
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      # Node selector to target Terraform-provisioned GPU nodes
+      nodeSelector:
+        role: gpu
+        gpu-enabled: "true"
+
+      containers:
+      - name: chatbot-service
+        imagePullPolicy: Always
+        image: smithquaz/fyp-chatbot-service:v1.0.0 # Replace with your actual image
+        resources:
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+            nvidia.com/gpu: 1 # Request 1 GPU per pod
+          requests:
+            memory: "4Gi"
+            cpu: "2000m"
+            nvidia.com/gpu: 1 # Request 1 GPU per pod
+        ports:
+        - containerPort: 8080
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: NVIDIA_DRIVER_CAPABILITIES
+          value: "compute,utility"
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: { duration: 30s }
+      - setWeight: 40
+      - pause: { duration: 30s }
+      - setWeight: 60
+      - pause: { duration: 30s }
+      - setWeight: 80
+      - pause: { duration: 30s }
+      - setWeight: 100
+      # traffic routing using istio subset
+      canaryService: chatbot-service-canary
+      stableService: chatbot-service-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: application-virtualservice # points to path based routing virtual service
+            routes:
+            - chatbot-service-route # Name of the route to be used
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatbot-service-stable
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: chatbot-service
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatbot-service-canary
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: chatbot-service
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP

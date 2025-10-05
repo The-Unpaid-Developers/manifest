@@ -50,3 +50,28 @@ variable "metrics_server_chart_version" {
   type        = string
   default     = "3.12.0"
 }
+
+# GPU Node Group Configuration
+variable "gpu_instance_types" {
+  description = "List of GPU instance types for the GPU node group"
+  type        = list(string)
+  default     = ["g4dn.xlarge"] # Cost-effective GPU instance, ~$0.526/hr
+}
+
+variable "gpu_desired_size" {
+  description = "Desired number of GPU nodes"
+  type        = number
+  default     = 1
+}
+
+variable "gpu_min_size" {
+  description = "Minimum number of GPU nodes (set to 0 to scale to zero)"
+  type        = number
+  default     = 0
+}
+
+variable "gpu_max_size" {
+  description = "Maximum number of GPU nodes"
+  type        = number
+  default     = 3
+}
