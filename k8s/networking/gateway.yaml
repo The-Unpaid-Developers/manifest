@@ -158,3 +158,18 @@ spec:
         port:
           number: 3000
       weight: 0 # Initial weight
+  - name: core-service-route # matched to core-service rollout
+    match:
+    - uri:
+        prefix: "/core-service/"
+    route:
+    - destination:
+        host: core-service-stable.fyp.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100 # Initial weight
+    - destination:
+        host: core-service-canary.fyp.svc.cluster.local
+        port:
+          number: 3000
+      weight: 0 # Initial weight
