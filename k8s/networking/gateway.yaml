@@ -166,10 +166,10 @@ spec:
     - destination:
         host: core-service-stable.fyp.svc.cluster.local
         port:
-          number: 3000
+          number: 8080
       weight: 100 # Initial weight
     - destination:
         host: core-service-canary.fyp.svc.cluster.local
         port:
-          number: 3000
+          number: 8080
       weight: 0 # Initial weight
