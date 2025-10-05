@@ -14,13 +14,11 @@ KEY_FILE="$CERT_FOLDER/private.key"
 
 # Domain List
 DOMAIN_LIST=(
-  "bchwey.com"
+  "fyp.bchwey.com"
   "argocd.bchwey.com"
   "kibana.bchwey.com"
   "grafana.bchwey.com"
-  "jaeger.bchwey.com"
   "kiali.bchwey.com"
-  "temporal.bchwey.com"
 )
 
 # Update Kubeconfig

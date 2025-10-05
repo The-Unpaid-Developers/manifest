@@ -41,7 +41,6 @@ spec:
           namespaces:
           - istio-system
           - istio-ingress
-          - temporal-system
           - logging
   - name: validate-image-tag
     match:
@@ -55,7 +54,6 @@ spec:
           namespaces:
           - istio-system
           - istio-ingress
-          - temporal-system
           - logging
     validate:
       message: "Using a mutable image tag e.g. 'latest' is not allowed."

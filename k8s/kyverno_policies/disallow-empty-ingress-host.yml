@@ -26,7 +26,6 @@ spec:
         any:
         - resources:
             namespaces:
-            - temporal-system
             - istio-system
             - istio-ingress
       validate:

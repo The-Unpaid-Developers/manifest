@@ -25,7 +25,6 @@ spec:
           namespaces:
           - istio-system
           - istio-ingress
-          - temporal-system
     preconditions:
       all:
       - key: "{{ request.operation || 'BACKGROUND' }}"

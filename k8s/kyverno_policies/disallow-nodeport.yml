@@ -30,7 +30,6 @@ spec:
           namespaces:
           - istio-system
           - istio-ingress
-          - temporal-system
     validate:
       message: "Services of type NodePort are not allowed."
       pattern:
