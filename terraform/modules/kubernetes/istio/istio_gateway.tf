@@ -29,7 +29,8 @@ resource "helm_release" "gateway" {
 
   depends_on = [
     helm_release.istio_base,
-    helm_release.istiod
+    helm_release.istiod,
+    var.aws_auth_configmap
   ]
 
 }

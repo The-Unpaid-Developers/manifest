@@ -25,4 +25,5 @@ resource "helm_release" "karpenter" {
     })
   ]
 
+  depends_on = [var.aws_auth_configmap]
 }

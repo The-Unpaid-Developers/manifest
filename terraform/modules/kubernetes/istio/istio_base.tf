@@ -17,4 +17,6 @@ resource "helm_release" "istio_base" {
       }
     })
   ]
+
+  depends_on = [var.aws_auth_configmap]
 }

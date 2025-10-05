@@ -12,7 +12,7 @@ variable "iam_user_name" {
 variable "eks_cluster_version" {
   description = "EKS Kubernetes cluster version"
   type        = string
-  default     = "1.31"
+  default     = "1.34"
 }
 
 variable "karpenter_chart_version" {
