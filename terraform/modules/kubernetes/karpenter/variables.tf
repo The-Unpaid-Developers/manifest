@@ -27,3 +27,8 @@ variable "karpenter_chart_version" {
   description = "Karpenter Helm chart version"
   type        = string
 }
+
+variable "aws_auth_configmap" {
+  description = "AWS auth ConfigMap dependency"
+  type        = any
+}

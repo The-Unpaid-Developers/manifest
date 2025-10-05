@@ -8,4 +8,6 @@ resource "helm_release" "prometheus_operator" {
 
   # overwrite values
   values = [file("${path.module}/values/custom_config.yaml")]
+
+  depends_on = [var.aws_auth_configmap]
 }

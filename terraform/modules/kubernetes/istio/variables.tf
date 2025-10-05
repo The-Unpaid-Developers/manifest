@@ -7,3 +7,8 @@ variable "istio_chart_version" {
   description = "Istio Helm chart version"
   type        = string
 }
+
+variable "aws_auth_configmap" {
+  description = "AWS auth ConfigMap dependency"
+  type        = any
+}

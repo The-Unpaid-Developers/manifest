@@ -10,4 +10,6 @@ resource "helm_release" "updater" {
   version          = var.argocd_image_updater_chart_version
 
   values = [file("${path.module}/values/image-updater.yaml")]
+
+  depends_on = [var.aws_auth_configmap]
 }

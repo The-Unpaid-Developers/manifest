@@ -35,6 +35,7 @@ module "karpenter" {
   unpaid_developers_singapore_eks_cluster_id       = module.eks.unpaid_developers_singapore_eks_cluster_id
   unpaid_developers_singapore_eks_cluster_endpoint = module.eks.unpaid_developers_singapore_eks_cluster_endpoint
   karpenter_chart_version                          = var.karpenter_chart_version
+  aws_auth_configmap                               = module.kubernetes.aws_auth_configmap
 
   depends_on = [module.eks, module.kubernetes]
 }
@@ -44,6 +45,7 @@ module "argocd" {
 
   argocd_chart_version               = var.argocd_chart_version
   argocd_image_updater_chart_version = var.argocd_image_updater_chart_version
+  aws_auth_configmap                 = module.kubernetes.aws_auth_configmap
 
   depends_on = [module.eks, module.kubernetes]
 }
@@ -53,6 +55,7 @@ module "istio" {
 
   unpaid_developers_singapore_eks_cluster_name = module.eks.unpaid_developers_singapore_eks_cluster_name
   istio_chart_version                          = var.istio_chart_version
+  aws_auth_configmap                           = module.kubernetes.aws_auth_configmap
 
   depends_on = [module.eks, module.kubernetes]
 }
@@ -61,6 +64,7 @@ module "metrics_server" {
   source = "./modules/kubernetes/metrics_server"
 
   metrics_server_chart_version = var.metrics_server_chart_version
+  aws_auth_configmap           = module.kubernetes.aws_auth_configmap
 
   depends_on = [module.eks, module.kubernetes]
 }
@@ -69,6 +73,7 @@ module "kyverno" {
   source = "./modules/kubernetes/kyverno"
 
   kyverno_chart_version = var.kyverno_chart_version
+  aws_auth_configmap    = module.kubernetes.aws_auth_configmap
 
   depends_on = [module.eks, module.kubernetes, module.istio]
 }

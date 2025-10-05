@@ -10,4 +10,6 @@ resource "helm_release" "argocd" {
 
   # overwrite values
   values = [file("${path.module}/values/argocd.yaml")]
+
+  depends_on = [var.aws_auth_configmap]
 }

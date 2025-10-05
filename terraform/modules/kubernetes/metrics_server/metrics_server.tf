@@ -15,4 +15,6 @@ resource "helm_release" "metrics_server" {
       args = ["--kubelet-insecure-tls"]
     })
   ]
+
+  depends_on = [var.aws_auth_configmap]
 }

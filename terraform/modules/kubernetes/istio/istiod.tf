@@ -32,5 +32,5 @@ resource "helm_release" "istiod" {
     })
   ]
 
-  depends_on = [helm_release.istio_base]
+  depends_on = [helm_release.istio_base, var.aws_auth_configmap]
 }

@@ -16,4 +16,6 @@ resource "helm_release" "kyverno" {
     }),
     file("${path.module}/values/tracing.yaml")
   ]
+
+  depends_on = [var.aws_auth_configmap]
 }
