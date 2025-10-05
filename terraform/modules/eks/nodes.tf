@@ -74,7 +74,7 @@ resource "aws_eks_node_group" "unpaid_developers_singapore_gpu_nodes" {
   taint {
     key    = "nvidia.com/gpu"
     value  = "true"
-    effect = "NO_SCHEDULE"
+    effect = "NoSchedule"
   }
 
   # Tags for cost tracking and management
