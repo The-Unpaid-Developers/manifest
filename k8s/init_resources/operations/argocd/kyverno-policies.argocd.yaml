@@ -4,7 +4,7 @@ metadata:
   name: kyverno-policies
   namespace: argocd
   finalizers:
-    - resources-finalizer.argocd.argoproj.io
+  - resources-finalizer.argocd.argoproj.io
   annotations:
     notifications.argoproj.io/subscribe.on-deployed.slack: argo-rollouts
     notifications.argoproj.io/subscribe.on-sync-failed.slack: argo-sync-failed
@@ -12,7 +12,7 @@ metadata:
 spec:
   project: fyp-project
   source:
-    repoURL: git@github.com:The-Unpaid-Developers/manifest.git
+    repoURL: https://github.com/The-Unpaid-Developers/manifest
     targetRevision: main
     path: k8s/kyverno_policies
   destination:
@@ -23,7 +23,7 @@ spec:
       selfHeal: true
       allowEmpty: false
     syncOptions:
-      - Validate=false
-      - CreateNamespace=false
-      - PrunePropagationPolicy=foreground
-      - PruneLast=true
+    - Validate=false
+    - CreateNamespace=false
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true

@@ -24,7 +24,7 @@ spec:
 
   # this references the git repository where the application is stored
   source:
-    repoURL: git@github.com:The-Unpaid-Developers/manifest.git
+    repoURL: https://github.com/The-Unpaid-Developers/manifest
     targetRevision: main
     path: k8s/application/chatbot-service/overlays/dev # name of the directory in the git repository
 

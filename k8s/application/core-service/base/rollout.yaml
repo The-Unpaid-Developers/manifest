@@ -23,7 +23,7 @@ spec:
       containers:
       - name: core-service
         imagePullPolicy: Always
-        image: smithquaz/fyp-core-service:v1.0.0
+        image: smithquaz/fyp-core-service:1.0.0
         resources:
           limits:
             memory: "800Mi"

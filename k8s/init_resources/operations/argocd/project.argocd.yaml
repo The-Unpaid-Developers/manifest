@@ -7,12 +7,11 @@ spec:
   description: App project for FYP
 
   sourceRepos:
-    - git@github.com:The-Unpaid-Developers/manifest.git
+  - https://github.com/The-Unpaid-Developers/manifest
 
   destinations:
   - namespace: '*'
     server: 'https://kubernetes.default.svc'
-
   # we need to this allow argocd to create cluster wide policies
   clusterResourceWhitelist:
   - group: "*"

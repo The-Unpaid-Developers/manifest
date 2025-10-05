@@ -16,14 +16,15 @@ metadata:
     notifications.argoproj.io/subscribe.on-sync-succeeded.slack: argo-sync
     notifications.argoproj.io/subscribe.on-rollout-step-completed.slack: argo-sync
 
-  finalizers: # upon deleting argoconfig, it will delete the application as well
+  finalizers:
+  # upon deleting argoconfig, it will delete the application as well
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: fyp-project
 
   # this references the git repository where the application is stored
   source:
-    repoURL: git@github.com:The-Unpaid-Developers/manifest.git
+    repoURL: https://github.com/The-Unpaid-Developers/manifest
     targetRevision: main
     path: k8s/application/core-service/overlays/dev # name of the directory in the git repository
 
