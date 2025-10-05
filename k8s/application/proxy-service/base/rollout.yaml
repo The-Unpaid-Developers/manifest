@@ -34,16 +34,53 @@ spec:
         - containerPort: 8000
         env:
         - name: CORE_SERVICE_URL
-          value: core-service:8080
+          value: proxy-service:8000
         - name: DIAGRAM_SERVICE_URL
           value: diagram-service:8081
         - name: CHATBOT_SERVICE_URL
           value: chatbot-service:8082
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: { duration: 20s }
+      - setWeight: 40
+      - pause: { duration: 20s }
+      - setWeight: 60
+      - pause: { duration: 20s }
+      - setWeight: 80
+      - pause: { duration: 20s }
+      - setWeight: 100
+      # traffic routing using istio subset
+      canaryService: proxy-service-canary
+      stableService: proxy-service-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: application-virtualservice # points to path based routing virtual service
+            routes:
+            - proxy-service-route # Name of the route to be used
+            # TODO: add a HTTPS route
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: proxy-service
+  name: proxy-service-stable
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: proxy-service
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy-service-canary
   namespace: fyp
 spec:
   type: ClusterIP
