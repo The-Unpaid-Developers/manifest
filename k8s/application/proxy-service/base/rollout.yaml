@@ -13,7 +13,6 @@ spec:
     metadata:
       labels:
         app: proxy-service
-
         # this label needs to be hard coded to the pod spec as kustomize will not patch custom resources
         # ref: https://github.com/kubernetes-sigs/kustomize/discussions/5496
         app.kubernetes.io/name: proxy-service
@@ -33,6 +32,10 @@ spec:
             cpu: "500m"
         ports:
         - containerPort: 8000
+        env:
+        - CORE_SERVICE_URL=core-service:8080
+        - DIAGRAM_SERVICE_URL=diagram-service:8081
+        - CHATBOT_SERVICE_URL=chatbot-service:8082
 ---
 apiVersion: v1
 kind: Service
