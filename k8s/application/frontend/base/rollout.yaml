@@ -23,7 +23,7 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-        image: smithquaz/fyp-frontend:v1.0.0
+        image: smithquaz/fyp-frontend:1.0.0
         resources:
           limits:
             memory: "800Mi"

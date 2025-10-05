@@ -35,7 +35,7 @@ spec:
       containers:
       - name: chatbot-service
         imagePullPolicy: Always
-        image: smithquaz/fyp-chatbot-service:v1.0.0 # Replace with your actual image
+        image: smithquaz/fyp-chatbot-service:1.0.0
         resources:
           limits:
             memory: "8Gi"
