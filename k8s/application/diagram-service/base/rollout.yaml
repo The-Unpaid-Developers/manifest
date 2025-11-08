@@ -1,29 +1,29 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: core-service-rollout
+  name: diagram-service-rollout
   namespace: fyp
 spec:
   replicas: 3
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: core-service
+      app: diagram-service
   template:
     metadata:
       labels:
-        app: core-service
+        app: diagram-service
 
         # this label needs to be hard coded to the pod spec as kustomize will not patch custom resources
         # ref: https://github.com/kubernetes-sigs/kustomize/discussions/5496
-        app.kubernetes.io/name: core-service
+        app.kubernetes.io/name: diagram-service
         # There is an addition 'version' label which will be added by 'canaryMetadata' and 'stableMetadata'
     spec:
       terminationGracePeriodSeconds: 3
       containers:
-      - name: core-service
+      - name: diagram-service
         imagePullPolicy: Always
-        image: smithquaz/fyp-core-service:v1.0.0
+        image: smithquaz/fyp-diagram-service:v1.0.0
         resources:
           limits:
             memory: "800Mi"
@@ -32,13 +32,10 @@ spec:
             memory: "500Mi"
             cpu: "500m"
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
         env:
-        - name: CONN_STR
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: connection-string
+        - name: CORE_SERVICE_URL
+          value: http://core-service-stable.fyp.svc.cluster.local:8080
   strategy:
     canary:
       steps:
@@ -52,41 +49,41 @@ spec:
       - pause: { duration: 20s }
       - setWeight: 100
       # traffic routing using istio subset
-      canaryService: core-service-canary
-      stableService: core-service-stable
+      canaryService: diagram-service-canary
+      stableService: diagram-service-stable
       trafficRouting:
         istio:
           virtualService:
             name: application-virtualservice # points to path based routing virtual service
             routes:
-            - core-service-route # Name of the route to be used
+            - diagram-service-route # Name of the route to be used
             # TODO: add a HTTPS route
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: core-service-stable
+  name: diagram-service-stable
   namespace: fyp
 spec:
   type: ClusterIP
   selector:
-    app: core-service
+    app: diagram-service
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 8081
+    targetPort: 8081
     protocol: TCP
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: core-service-canary
+  name: diagram-service-canary
   namespace: fyp
 spec:
   type: ClusterIP
   selector:
-    app: core-service
+    app: diagram-service
   ports:
-  - port: 8080
-    targetPort: 8080
+  - port: 8081
+    targetPort: 8081
     protocol: TCP
