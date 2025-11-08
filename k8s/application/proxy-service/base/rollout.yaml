@@ -22,7 +22,7 @@ spec:
       containers:
       - name: proxy-service
         imagePullPolicy: Always
-        image: smithquaz/fyp-proxy-service:1.0.0
+        image: smithquaz/fyp-proxy-service:v1.0.0
         resources:
           limits:
             memory: "800Mi"
