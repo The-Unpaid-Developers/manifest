@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: diagram-service
+  namespace: argocd # namespace where argocd is deployed
+  annotations:
+    # only update upon every change in the image
+    argocd-image-updater.argoproj.io/image-list: smithquaz/fyp-diagram-service:*
+
+    # allow image updater to make a commit to the git repository
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/write-back-target: "kustomization"
+
+    # slack notification settings
+    notifications.argoproj.io/subscribe.on-deployed.slack: argo-rollouts
+    notifications.argoproj.io/subscribe.on-sync-failed.slack: argo-sync-failed
+    notifications.argoproj.io/subscribe.on-sync-succeeded.slack: argo-sync
+    notifications.argoproj.io/subscribe.on-rollout-step-completed.slack: argo-sync
+
+  finalizers:
+  # upon deleting argoconfig, it will delete the application as well
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: fyp-project
+
+  # this references the git repository where the application is stored
+  source:
+    repoURL: https://github.com/The-Unpaid-Developers/manifest
+    targetRevision: main
+    path: k8s/application/diagram-service/overlays/dev # name of the directory in the git repository
+    kustomize: {}
+
+  # sync policy and where argocd is deploying to (currently to itself)
+  # sync policy is automated and will prune and self-heal
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - Validate=true
+    - CreateNamespace=false
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
