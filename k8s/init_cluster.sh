@@ -88,7 +88,7 @@ integrate_certificate() {
   # Ensure the certificate files exist
   if [[ ! -f "$CERT_FOLDER/certificate.crt" || ! -f "$CERT_FOLDER/ca_bundle.crt" || ! -f "$KEY_FILE" ]]; then
     echo "Certificate files not found in $CERT_FOLDER. Please ensure certificate.crt, ca_bundle.crt, and private.key are present."
-    break # exits the do block but continues the script
+    return 1 # exit the function with error status
   fi
 
   # Combine the certificate and CA bundle

@@ -83,21 +83,6 @@ spec:
           number: 20001
 
   # Path-based routing for main application
-  - name: frontend-route # matched to frontend rollout
-    match:
-    - uri:
-        prefix: "/"
-    route:
-    - destination:
-        host: frontend-stable.fyp.svc.cluster.local
-        port:
-          number: 3000
-      weight: 100 # Initial weight
-    - destination:
-        host: frontend-canary.fyp.svc.cluster.local
-        port:
-          number: 3000
-      weight: 0 # Initial weight
   - name: core-service-route # matched to core-service rollout
     match:
     - uri:
@@ -145,3 +130,20 @@ spec:
         port:
           number: 8081
       weight: 0
+
+  # Catch-all route for frontend - must be LAST since "/" matches all paths
+  - name: frontend-route # matched to frontend rollout
+    match:
+    - uri:
+        prefix: "/"
+    route:
+    - destination:
+        host: frontend-stable.fyp.svc.cluster.local
+        port:
+          number: 3000
+      weight: 100 # Initial weight
+    - destination:
+        host: frontend-canary.fyp.svc.cluster.local
+        port:
+          number: 3000
+      weight: 0 # Initial weight
