@@ -1,6 +1,6 @@
 namespace: fyp
-images: 
+images:
 - name: smithquaz/fyp-core-service
-  newTag: "v1.0.0"
+  newTag: v1.0.2
 resources:
-  - ../../base
+- ../../base
