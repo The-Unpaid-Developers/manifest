@@ -51,6 +51,34 @@ kubectl apply -f secrets/ --recursive || {
   echo "Secrets folder not found or not accessible. Skipping secrets configuration."
 }
 
+# Restart ArgoCD Components Function
+restart_argocd_components() {
+  echo "Restarting ArgoCD components to load repository credentials..."
+  
+  kubectl rollout restart deployment/argocd-repo-server -n argocd 2>/dev/null && \
+    echo "  - Restarted argocd-repo-server" || echo "  - argocd-repo-server not found (may not be deployed yet)"
+  
+  kubectl rollout restart statefulset/argocd-application-controller -n argocd 2>/dev/null && \
+    echo "  - Restarted argocd-application-controller" || echo "  - argocd-application-controller not found (may not be deployed yet)"
+  
+  kubectl rollout restart deployment/updater-argocd-image-updater -n argocd 2>/dev/null && \
+    echo "  - Restarted argocd-image-updater" || echo "  - argocd-image-updater not found (may not be deployed yet)"
+
+  echo "Waiting for ArgoCD components to be ready..."
+  
+  kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=120s 2>/dev/null || \
+    echo "  - argocd-repo-server not ready or not found"
+  
+  kubectl rollout status statefulset/argocd-application-controller -n argocd --timeout=120s 2>/dev/null || \
+    echo "  - argocd-application-controller not ready or not found"
+  
+  kubectl rollout status deployment/updater-argocd-image-updater -n argocd --timeout=120s 2>/dev/null || \
+    echo "  - argocd-image-updater not ready or not found"
+}
+
+# Restart ArgoCD components to pick up new credentials
+restart_argocd_components
+
 # SSL Certificate Integration Using ZeroSSL Multi-Domain Certificate
 integrate_certificate() {
   set -e  # Exit the function if any command fails
@@ -95,6 +123,8 @@ echo "Applying networking configuration..."
 kubectl apply -f networking/ --recursive
 
 # Redeploy Argo Notification Controller to mount config map (added from init_resources)
-kubectl rollout restart deployment/argocd-notifications-controller -n argocd
+echo "Restarting ArgoCD notifications controller..."
+kubectl rollout restart deployment/argocd-notifications-controller -n argocd 2>/dev/null || \
+  echo "  - argocd-notifications-controller not found"
 
 echo "Cluster initialization complete."

@@ -9,6 +9,8 @@ metadata:
 
     # allow image updater to make a commit to the git repository
     argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/git-branch: main
+    argocd-image-updater.argoproj.io/write-back-target: "kustomization"
 
     # slack notification settings
     notifications.argoproj.io/subscribe.on-deployed.slack: argo-rollouts
@@ -27,6 +29,7 @@ spec:
     repoURL: https://github.com/The-Unpaid-Developers/manifest
     targetRevision: main
     path: k8s/application/proxy-service/overlays/dev # name of the directory in the git repository
+    kustomize: {}
 
   # sync policy and where argocd is deploying to (currently to itself)
   # sync policy is automated and will prune and self-heal

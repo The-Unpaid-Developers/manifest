@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: diagram-service-rollout
+  namespace: fyp
+spec:
+  replicas: 3
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: diagram-service
+  template:
+    metadata:
+      labels:
+        app: diagram-service
+
+        # this label needs to be hard coded to the pod spec as kustomize will not patch custom resources
+        # ref: https://github.com/kubernetes-sigs/kustomize/discussions/5496
+        app.kubernetes.io/name: diagram-service
+        # There is an addition 'version' label which will be added by 'canaryMetadata' and 'stableMetadata'
+    spec:
+      terminationGracePeriodSeconds: 3
+      containers:
+      - name: diagram-service
+        imagePullPolicy: Always
+        image: smithquaz/fyp-diagram-service:v1.0.0
+        resources:
+          limits:
+            memory: "800Mi"
+            cpu: "800m"
+          requests:
+            memory: "500Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8081
+        env:
+        - name: CORE_SERVICE_URL
+          value: http://core-service-stable.fyp.svc.cluster.local:8080
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: { duration: 20s }
+      - setWeight: 40
+      - pause: { duration: 20s }
+      - setWeight: 60
+      - pause: { duration: 20s }
+      - setWeight: 80
+      - pause: { duration: 20s }
+      - setWeight: 100
+      # traffic routing using istio subset
+      canaryService: diagram-service-canary
+      stableService: diagram-service-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: application-virtualservice # points to path based routing virtual service
+            routes:
+            - diagram-service-route # Name of the route to be used
+            # TODO: add a HTTPS route
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: diagram-service-stable
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: diagram-service
+  ports:
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: diagram-service-canary
+  namespace: fyp
+spec:
+  type: ClusterIP
+  selector:
+    app: diagram-service
+  ports:
+  - port: 8081
+    targetPort: 8081
+    protocol: TCP
