@@ -1,6 +1,6 @@
 namespace: fyp
 images:
 - name: smithquaz/fyp-diagram-service
-  newTag: "v1.0.0"
+  newTag: v1.0.1
 resources:
 - ../../base
