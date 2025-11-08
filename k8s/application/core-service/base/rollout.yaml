@@ -34,9 +34,11 @@ spec:
         ports:
         - containerPort: 8080
         env:
-          # Don't set this in prod, use a secret instead
-          - name: CONN_STR
-            value: mongodb+srv://yuchen1310_db_user:JAYMCbIjBSQBcmEg@cluster0.rgod43r.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+        - name: CONN_STR
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: connection-string
   strategy:
     canary:
       steps:
