@@ -107,12 +107,12 @@ spec:
     - destination:
         host: proxy-service-stable.fyp.svc.cluster.local
         port:
-          number: 8080
+          number: 8000
       weight: 100 # Initial weight
     - destination:
         host: proxy-service-canary.fyp.svc.cluster.local
         port:
-          number: 8080
+          number: 8000
       weight: 0 # Initial weight
 
   - name: diagram-service-route # matched to diagram-service rollout
@@ -129,6 +129,22 @@ spec:
         host: diagram-service-canary.fyp.svc.cluster.local
         port:
           number: 8081
+      weight: 0
+
+  - name: chatbot-service-route # matched to chatbot-service rollout
+    match:
+    - uri:
+        prefix: "/chatbot/"
+    route:
+    - destination:
+        host: chatbot-service-stable.fyp.svc.cluster.local
+        port:
+          number: 8000
+      weight: 100
+    - destination:
+        host: chatbot-service-canary.fyp.svc.cluster.local
+        port:
+          number: 8000
       weight: 0
 
   # Catch-all route for frontend - must be LAST since "/" matches all paths

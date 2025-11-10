@@ -9,7 +9,7 @@ resource "aws_eks_node_group" "unpaid_developers_singapore_nodes" {
     var.private_subnet_ids[1]
   ]
 
-  # capacity_type  = "SPOT"
+  capacity_type  = "SPOT"
   instance_types = ["t3.2xlarge"]
 
   disk_size = 100
