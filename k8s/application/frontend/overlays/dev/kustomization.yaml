@@ -1,6 +1,6 @@
 namespace: fyp
-images: 
+images:
 - name: smithquaz/fyp-frontend
-  newTag: "v1.0.0"
+  newTag: v1.0.1
 resources:
-  - ../../base
+- ../../base
