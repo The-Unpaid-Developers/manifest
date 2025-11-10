@@ -34,11 +34,11 @@ spec:
         - containerPort: 8000
         env:
         - name: CORE_SERVICE_URL
-          value: core-service-stable:8080
+          value: http://core-service-stable:8080
         - name: DIAGRAM_SERVICE_URL
-          value: diagram-service-stable:8081
+          value: http://diagram-service-stable:8081
         - name: CHATBOT_SERVICE_URL
-          value: chatbot-service-stable:8000
+          value: http://chatbot-service-stable:8000
   strategy:
     canary:
       steps:
