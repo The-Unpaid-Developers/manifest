@@ -309,7 +309,7 @@ log_info "Resources remaining in key namespaces:"
 
 for ns in application logging argo-rollouts; do
   if kubectl get namespace "$ns" &>/dev/null; then
-    local count=$(kubectl get all -n "$ns" 2>/dev/null | grep -v "^NAME" | wc -l)
+    count=$(kubectl get all -n "$ns" 2>/dev/null | grep -v "^NAME" | wc -l)
     if [[ $count -gt 0 ]]; then
       log_warn "  $ns: $count resources remaining"
     else
