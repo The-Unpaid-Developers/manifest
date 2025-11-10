@@ -12,6 +12,25 @@ CERT_FOLDER="certificates"
 CERT_FILE="$CERT_FOLDER/tls.crt"
 KEY_FILE="$CERT_FOLDER/private.key"
 
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Helper function for coloured output
+log_info() {
+  echo -e "${GREEN}[INFO]${NC} $1"
+}
+
+log_warn() {
+  echo -e "${YELLOW}[WARN]${NC} $1"
+}
+
+log_error() {
+  echo -e "${RED}[ERROR]${NC} $1"
+}
+
 # Domain List
 DOMAIN_LIST=(
   "fyp.bchewy.com"
@@ -22,58 +41,58 @@ DOMAIN_LIST=(
 )
 
 # Update Kubeconfig
-echo "Updating kubeconfig for cluster: $CLUSTER_NAME in region: $REGION"
+log_info "Updating kubeconfig for cluster: $CLUSTER_NAME in region: $REGION"
 aws eks update-kubeconfig --name "$CLUSTER_NAME" --region "$REGION"
 
 # Initial Deployment
-echo "Applying namespaces..."
+log_info "Applying namespaces..."
 kubectl apply -f namespaces/ --recursive
 
 # Try applying CRDs (idempotent)
-echo "Applying ElasticSearch CRDs..."
+log_info "Applying ElasticSearch CRDs..."
 kubectl apply -f https://download.elastic.co/downloads/eck/2.12.1/crds.yaml || {
-  echo "Failed to apply CRDs. Continuing..."
+  log_warn "Failed to apply CRDs. Continuing..."
 }
 
 # Apply Argo Rollouts
-echo "Applying Argo Rollouts..."
-kubectl create namespace argo-rollouts || echo "Namespace already exists"
+log_info "Applying Argo Rollouts..."
+kubectl create namespace argo-rollouts || log_warn "Namespace already exists"
 kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
 kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/notifications-install.yaml
 
 # Other Initial Resources
-echo "Applying initial resources..."
+log_info "Applying initial resources..."
 kubectl apply -f init_resources/ --recursive
 
 # Configuring Secrets
-echo "Applying secrets..."
+log_info "Applying secrets..."
 kubectl apply -f secrets/ --recursive || {
-  echo "Secrets folder not found or not accessible. Skipping secrets configuration."
+  log_warn "Secrets folder not found or not accessible. Skipping secrets configuration."
 }
 
 # Restart ArgoCD Components Function
 restart_argocd_components() {
-  echo "Restarting ArgoCD components to load repository credentials..."
+  log_info "Restarting ArgoCD components to load repository credentials..."
   
   kubectl rollout restart deployment/argocd-repo-server -n argocd 2>/dev/null && \
-    echo "  - Restarted argocd-repo-server" || echo "  - argocd-repo-server not found (may not be deployed yet)"
+    log_info "  - Restarted argocd-repo-server" || log_warn "  - argocd-repo-server not found (may not be deployed yet)"
   
   kubectl rollout restart statefulset/argocd-application-controller -n argocd 2>/dev/null && \
-    echo "  - Restarted argocd-application-controller" || echo "  - argocd-application-controller not found (may not be deployed yet)"
+    log_info "  - Restarted argocd-application-controller" || log_warn "  - argocd-application-controller not found (may not be deployed yet)"
   
   kubectl rollout restart deployment/updater-argocd-image-updater -n argocd 2>/dev/null && \
-    echo "  - Restarted argocd-image-updater" || echo "  - argocd-image-updater not found (may not be deployed yet)"
+    log_info "  - Restarted argocd-image-updater" || log_warn "  - argocd-image-updater not found (may not be deployed yet)"
 
-  echo "Waiting for ArgoCD components to be ready..."
+  log_info "Waiting for ArgoCD components to be ready..."
   
   kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=120s 2>/dev/null || \
-    echo "  - argocd-repo-server not ready or not found"
+    log_warn "  - argocd-repo-server not ready or not found"
   
   kubectl rollout status statefulset/argocd-application-controller -n argocd --timeout=120s 2>/dev/null || \
-    echo "  - argocd-application-controller not ready or not found"
+    log_warn "  - argocd-application-controller not ready or not found"
   
   kubectl rollout status deployment/updater-argocd-image-updater -n argocd --timeout=120s 2>/dev/null || \
-    echo "  - argocd-image-updater not ready or not found"
+    log_warn "  - argocd-image-updater not ready or not found"
 }
 
 # Restart ArgoCD components to pick up new credentials
@@ -83,11 +102,11 @@ restart_argocd_components
 integrate_certificate() {
   set -e  # Exit the function if any command fails
 
-  echo "Integrating ZeroSSL multi-domain certificate..."
+  log_info "Integrating ZeroSSL multi-domain certificate..."
 
   # Ensure the certificate files exist
   if [[ ! -f "$CERT_FOLDER/certificate.crt" || ! -f "$CERT_FOLDER/ca_bundle.crt" || ! -f "$KEY_FILE" ]]; then
-    echo "Certificate files not found in $CERT_FOLDER. Please ensure certificate.crt, ca_bundle.crt, and private.key are present."
+    log_error "Certificate files not found in $CERT_FOLDER. Please ensure certificate.crt, ca_bundle.crt, and private.key are present."
     return 1 # exit the function with error status
   fi
 
@@ -96,35 +115,35 @@ integrate_certificate() {
 
   # Ensure the namespace exists (idempotent)
   if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1; then
-    echo "Namespace $NAMESPACE already exists"
+    log_info "Namespace $NAMESPACE already exists"
   else
-    echo "Creating namespace $NAMESPACE"
+    log_info "Creating namespace $NAMESPACE"
     kubectl create namespace "$NAMESPACE"
   fi
 
   # Create or update Kubernetes TLS secret (idempotent)
-  echo "Creating or updating Kubernetes TLS secret: $SECRET_NAME"
+  log_info "Creating or updating Kubernetes TLS secret: $SECRET_NAME"
   kubectl create secret tls "$SECRET_NAME" \
     --cert="$CERT_FILE" \
     --key="$KEY_FILE" \
     --namespace="$NAMESPACE" \
     --dry-run=client -o yaml | kubectl apply -f -
 
-  echo "ZeroSSL multi-domain certificate integrated."
+  log_info "ZeroSSL multi-domain certificate integrated."
 }
 
 # Try to run the certificate integration
 if ! integrate_certificate; then
-  echo "Certificate integration failed. Skipping this block."
+  log_warn "Certificate integration failed. Skipping this block."
 fi
 
 # Configure Networking
-echo "Applying networking configuration..."
+log_info "Applying networking configuration..."
 kubectl apply -f networking/ --recursive
 
 # Redeploy Argo Notification Controller to mount config map (added from init_resources)
-echo "Restarting ArgoCD notifications controller..."
+log_info "Restarting ArgoCD notifications controller..."
 kubectl rollout restart deployment/argocd-notifications-controller -n argocd 2>/dev/null || \
-  echo "  - argocd-notifications-controller not found"
+  log_warn "  - argocd-notifications-controller not found"
 
-echo "Cluster initialization complete."
+log_info "Cluster initialization complete."

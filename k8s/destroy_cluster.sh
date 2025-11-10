@@ -38,6 +38,8 @@ echo "=========================================="
 echo "CLUSTER CLEANUP SCRIPT"
 echo "=========================================="
 echo "This script will delete the following:"
+echo "  - Admission webhooks (including Kyverno)"
+echo "  - Kyverno resources (deployments, pods, services, policies, jobs, Helm state)"
 echo "  - ArgoCD Applications (application workloads)"
 echo "  - Init resources (monitoring, logging, operations)"
 echo "  - Networking configuration"
@@ -91,6 +93,83 @@ delete_webhooks "validatingwebhookconfigurations"
 
 log_info "Checking for mutating webhooks..."
 delete_webhooks "mutatingwebhookconfigurations"
+
+# ==============================================================================
+# STEP 1.5: Force Delete Kyverno Resources (Prevent Helm Uninstall Deadlock)
+# ==============================================================================
+log_info "Step 1.5: Force cleaning up Kyverno resources..."
+
+# Delete Kyverno-specific webhooks (these are the main blockers)
+log_info "  Deleting Kyverno webhooks..."
+kubectl delete validatingwebhookconfigurations kyverno-resource-validating-webhook-cfg --ignore-not-found=true 2>/dev/null || true
+kubectl delete validatingwebhookconfigurations kyverno-policy-validating-webhook-cfg --ignore-not-found=true 2>/dev/null || true
+kubectl delete mutatingwebhookconfigurations kyverno-resource-mutating-webhook-cfg --ignore-not-found=true 2>/dev/null || true
+kubectl delete mutatingwebhookconfigurations kyverno-policy-mutating-webhook-cfg --ignore-not-found=true 2>/dev/null || true
+kubectl delete mutatingwebhookconfigurations kyverno-verify-mutating-webhook-cfg --ignore-not-found=true 2>/dev/null || true
+
+# Delete by label (catches any remaining Kyverno webhooks)
+log_info "  Deleting Kyverno webhooks by label..."
+kubectl delete validatingwebhookconfigurations -l app.kubernetes.io/instance=unpaid-developers-singapore-kyverno-release --ignore-not-found=true 2>/dev/null || true
+kubectl delete mutatingwebhookconfigurations -l app.kubernetes.io/instance=unpaid-developers-singapore-kyverno-release --ignore-not-found=true 2>/dev/null || true
+
+# Delete all Kyverno policies (these can also block deletion)
+log_info "  Deleting Kyverno policies..."
+kubectl delete clusterpolicies --all --force --grace-period=0 --ignore-not-found=true 2>/dev/null || \
+  log_warn "  No ClusterPolicies found or already deleted"
+
+kubectl delete policies --all -A --force --grace-period=0 --ignore-not-found=true 2>/dev/null || \
+  log_warn "  No Policies found or already deleted"
+
+# Delete ClusterPolicyReports and PolicyReports
+log_info "  Deleting Kyverno policy reports..."
+kubectl delete clusterpolicyreports --all --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+kubectl delete policyreports --all -A --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+
+# Remove finalizers from stuck Kyverno resources
+if kubectl get namespace kyverno &>/dev/null; then
+  log_info "  Checking for stuck Kyverno resources..."
+  
+  # Remove finalizers from stuck policies
+  for policy in $(kubectl get clusterpolicies -o jsonpath='{.items[*].metadata.name}' 2>/dev/null); do
+    log_warn "  Removing finalizers from ClusterPolicy: $policy"
+    kubectl patch clusterpolicy "$policy" -p '{"metadata":{"finalizers":null}}' --type=merge 2>/dev/null || true
+  done
+  
+  # Force delete Kyverno deployments (prevents pod recreation)
+  log_info "  Force deleting Kyverno deployments..."
+  kubectl delete deployment -n kyverno --all --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+  
+  # Force delete Kyverno replicasets
+  log_info "  Force deleting Kyverno replicasets..."
+  kubectl delete replicaset -n kyverno --all --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+  
+  # Force delete Kyverno jobs (Helm cleanup jobs can get stuck)
+  log_info "  Force deleting Kyverno jobs..."
+  kubectl delete job -n kyverno --all --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+  
+  # Force delete Kyverno pods if they're stuck
+  log_info "  Force deleting any stuck Kyverno pods..."
+  kubectl delete pods -n kyverno --all --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+  
+  # Force delete Kyverno services
+  log_info "  Force deleting Kyverno services..."
+  kubectl delete svc -n kyverno --all --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+  
+  # Clean up stuck Helm release state (secrets)
+  log_info "  Cleaning up Helm release state..."
+  kubectl delete secrets -n kyverno -l "name=unpaid-developers-singapore-kyverno-release,owner=helm" --force --grace-period=0 --ignore-not-found=true 2>/dev/null || true
+  
+  # Check if namespace is stuck in Terminating state
+  if kubectl get namespace kyverno -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Terminating"; then
+    log_warn "  Kyverno namespace is stuck in Terminating, removing finalizers..."
+    kubectl get namespace kyverno -o json | \
+      jq '.spec.finalizers = []' | \
+      kubectl replace --raw /api/v1/namespaces/kyverno/finalize -f - 2>/dev/null || \
+      log_warn "  Failed to remove namespace finalizers (jq may not be installed)"
+  fi
+fi
+
+log_info "  Kyverno cleanup complete"
 
 # ==============================================================================
 # STEP 2: Delete ArgoCD Applications (This deletes actual workloads)
@@ -324,10 +403,12 @@ echo ""
 log_info "Cleanup complete!"
 echo ""
 log_warn "Note: The following are NOT deleted (managed by Terraform):"
-echo "  - Helm releases (ArgoCD, Istio, Kyverno, etc.)"
-echo "  - CRDs (ElasticSearch, Istio, etc.)"
+echo "  - Helm releases (ArgoCD, Istio, etc.)"
+echo "  - CRDs (ElasticSearch, Istio, Kyverno, etc.)"
 echo "  - Core namespaces (argocd, istio-system, kube-system, etc.)"
 echo "  - Infrastructure components (AWS Load Balancers, etc.)"
+echo ""
+log_info "Note: Kyverno resources ARE pre-cleaned to prevent Helm uninstall deadlock"
 echo ""
 log_info "To fully destroy the cluster, run: terraform destroy"
 echo ""
