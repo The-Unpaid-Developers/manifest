@@ -87,6 +87,8 @@ spec:
     match:
     - uri:
         prefix: "/core-service/"
+    rewrite:
+      uri: "/"
     route:
     - destination:
         host: core-service-stable.fyp.svc.cluster.local
@@ -103,6 +105,8 @@ spec:
     match:
     - uri:
         prefix: "/proxy-service/"
+    rewrite:
+      uri: "/"
     route:
     - destination:
         host: proxy-service-stable.fyp.svc.cluster.local
@@ -119,6 +123,8 @@ spec:
     match:
     - uri:
         prefix: "/diagram/"
+    rewrite:
+      uri: "/"
     route:
     - destination:
         host: diagram-service-stable.fyp.svc.cluster.local
@@ -135,6 +141,8 @@ spec:
     match:
     - uri:
         prefix: "/chatbot/"
+    rewrite:
+      uri: "/"
     route:
     - destination:
         host: chatbot-service-stable.fyp.svc.cluster.local
