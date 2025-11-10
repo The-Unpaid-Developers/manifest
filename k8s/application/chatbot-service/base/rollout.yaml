@@ -52,6 +52,46 @@ spec:
           value: "all"
         - name: NVIDIA_DRIVER_CAPABILITIES
           value: "compute,utility"
+        - name: MONGO_USER
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: MONGO_USER
+        - name: MONGO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: MONGO_PASSWORD
+        - name: S3_URI
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: S3_URI
+        - name: S3_BUCKET
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: S3_BUCKET
+        - name: S3_PREFIX
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: S3_PREFIX
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_REGION
+          valueFrom:
+            secretKeyRef:
+              name: chatbot-service-secrets
+              key: AWS_REGION
         # Health checks
         livenessProbe:
           httpGet:
