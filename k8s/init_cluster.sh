@@ -7,18 +7,18 @@ set -o pipefail  # Prevents errors in a pipeline from being masked
 CLUSTER_NAME="unpaid-developers-singapore-eks-cluster"
 REGION="ap-southeast-1"
 NAMESPACE="istio-ingress"
-SECRET_NAME="bchwey-zerossl-tls-secret"
+SECRET_NAME="bchewy-zerossl-tls-secret"
 CERT_FOLDER="certificates"
 CERT_FILE="$CERT_FOLDER/tls.crt"
 KEY_FILE="$CERT_FOLDER/private.key"
 
 # Domain List
 DOMAIN_LIST=(
-  "fyp.bchwey.com"
-  "argocd.bchwey.com"
-  "kibana.bchwey.com"
-  "grafana.bchwey.com"
-  "kiali.bchwey.com"
+  "fyp.bchewy.com"
+  "argocd.bchewy.com"
+  "kibana.bchewy.com"
+  "grafana.bchewy.com"
+  "kiali.bchewy.com"
 )
 
 # Update Kubeconfig
