@@ -156,10 +156,10 @@ spec:
     - destination:
         host: frontend-stable.fyp.svc.cluster.local
         port:
-          number: 3000
+          number: 80
       weight: 100 # Initial weight
     - destination:
         host: frontend-canary.fyp.svc.cluster.local
         port:
-          number: 3000
+          number: 80
       weight: 0 # Initial weight
