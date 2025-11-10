@@ -39,3 +39,5 @@ terraform.rc
 secrets/
 
 .DS_Store
+
+certificates/
