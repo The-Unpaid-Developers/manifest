@@ -74,8 +74,8 @@ spec:
     app: core-service
   ports:
   - name: http
-    port: 8081
-    targetPort: 8081
+    port: 8080
+    targetPort: 8080
     protocol: TCP
 ---
 apiVersion: v1
@@ -89,6 +89,6 @@ spec:
     app: core-service
   ports:
   - name: http
-    port: 8081
-    targetPort: 8081
+    port: 8080
+    targetPort: 8080
     protocol: TCP
