@@ -34,11 +34,11 @@ spec:
         - containerPort: 8000
         env:
         - name: CORE_SERVICE_URL
-          value: core-service:8000
+          value: core-service-stable:8080
         - name: DIAGRAM_SERVICE_URL
-          value: diagram-service:8081
+          value: diagram-service-stable:8081
         - name: CHATBOT_SERVICE_URL
-          value: chatbot-service:8082
+          value: chatbot-service-stable:8000
   strategy:
     canary:
       steps:
@@ -73,7 +73,8 @@ spec:
   selector:
     app: proxy-service
   ports:
-  - port: 8000
+  - name: http
+    port: 8000
     targetPort: 8000
     protocol: TCP
 ---
@@ -87,6 +88,7 @@ spec:
   selector:
     app: proxy-service
   ports:
-  - port: 8000
+  - name: http
+    port: 8000
     targetPort: 8000
     protocol: TCP
