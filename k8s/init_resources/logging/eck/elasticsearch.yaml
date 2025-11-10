@@ -10,6 +10,17 @@ spec:
     count: 3
     config:
       node.roles: ["master"]
+    podTemplate:
+      spec:
+        containers:
+        - name: elasticsearch
+          resources:
+            requests:
+              memory: 2Gi
+              cpu: 1000m
+            limits:
+              memory: 2Gi
+              cpu: 1000m
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
@@ -24,6 +35,17 @@ spec:
     count: 5
     config:
       node.roles: ["data"]
+    podTemplate:
+      spec:
+        containers:
+        - name: elasticsearch
+          resources:
+            requests:
+              memory: 4Gi
+              cpu: 2000m
+            limits:
+              memory: 4Gi
+              cpu: 2000m
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
