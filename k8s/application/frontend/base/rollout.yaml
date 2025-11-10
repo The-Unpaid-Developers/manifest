@@ -32,7 +32,7 @@ spec:
             memory: "500Mi"
             cpu: "500m"
         ports:
-        - containerPort: 3000
+        - containerPort: 80
   strategy:
     canary:
       steps:
@@ -68,7 +68,7 @@ spec:
     app: frontend
   ports:
   - port: 3000
-    targetPort: 3000
+    targetPort: 80
     protocol: TCP
 ---
 apiVersion: v1
@@ -82,5 +82,5 @@ spec:
     app: frontend
   ports:
   - port: 3000
-    targetPort: 3000
+    targetPort: 80
     protocol: TCP
