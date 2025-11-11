@@ -34,8 +34,10 @@ spec:
         ports:
         - containerPort: 80
         env:
-        - name: PROXY_SERVICE_URL
-          value: "https://fyp.bchewy.com/proxy-service"
+        - name: CORE_SERVICE_URL
+          value: "https://fyp.bchewy.com/core-service"
+        - name: DIAGRAM_SERVICE_URL
+          value: "https://fyp.bchewy.com/diagram-service"
   strategy:
     canary:
       steps:
