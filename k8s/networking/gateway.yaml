@@ -122,7 +122,7 @@ spec:
   - name: diagram-service-route # matched to diagram-service rollout
     match:
     - uri:
-        prefix: "/diagram/"
+        prefix: "/diagram-service/"
     rewrite:
       uri: "/"
     route:
@@ -140,7 +140,7 @@ spec:
   - name: chatbot-service-route # matched to chatbot-service rollout
     match:
     - uri:
-        prefix: "/chatbot/"
+        prefix: "/chatbot-service/"
     rewrite:
       uri: "/"
     route:
