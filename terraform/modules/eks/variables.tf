@@ -22,7 +22,7 @@ variable "eks_cluster_version" {
 variable "gpu_instance_types" {
   description = "List of GPU instance types for the GPU node group"
   type        = list(string)
-  default     = ["g4dn.2xlarge"]
+  default     = ["g6e.xlarge"]
 }
 
 variable "gpu_desired_size" {
