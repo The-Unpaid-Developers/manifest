@@ -93,13 +93,23 @@ spec:
               name: chatbot-service-secrets
               key: AWS_REGION
         # Health checks
+        # Increased timings to allow for S3 model download (~35GB)
+        # Model download typically takes 5-10 minutes on first startup
         livenessProbe:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 60
-          periodSeconds: 10
-          timeoutSeconds: 5
+          initialDelaySeconds: 600 # Wait 10 minutes before first check
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 600 # Wait 10 minutes before first check
+          periodSeconds: 30
+          timeoutSeconds: 10
           failureThreshold: 3
 
   strategy:
