@@ -37,7 +37,7 @@ spec:
         - name: CORE_SERVICE_URL
           value: "https://fyp.bchewy.com/core-service"
         - name: DIAGRAM_SERVICE_URL
-          value: "https://fyp.bchewy.com/diagram-service"
+          value: "https://fyp.bchewy.com/diagram"
   strategy:
     canary:
       steps:
