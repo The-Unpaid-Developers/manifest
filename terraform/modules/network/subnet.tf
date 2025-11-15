@@ -2,7 +2,7 @@
 resource "aws_subnet" "unpaid_developers_singapore_public_subnet_1" {
   vpc_id                  = aws_vpc.unpaid_developers_singapore_vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "ap-southeast-1a"
+  availability_zone       = "us-east-1a"
   #checkov:skip=CKV_AWS_130:Subnet is intended to be public and assign public IPs by default
   map_public_ip_on_launch = true
 
@@ -21,7 +21,7 @@ resource "aws_subnet" "unpaid_developers_singapore_public_subnet_1" {
 resource "aws_subnet" "unpaid_developers_singapore_public_subnet_2" {
   vpc_id                  = aws_vpc.unpaid_developers_singapore_vpc.id
   cidr_block              = "10.0.2.0/24"
-  availability_zone       = "ap-southeast-1b"
+  availability_zone       = "us-east-1b"
   #checkov:skip=CKV_AWS_130:Subnet is intended to be public and assign public IPs by default
   map_public_ip_on_launch = true
   tags = {
@@ -34,7 +34,7 @@ resource "aws_subnet" "unpaid_developers_singapore_public_subnet_2" {
 resource "aws_subnet" "unpaid_developers_singapore_private_subnet_1" {
   vpc_id                  = aws_vpc.unpaid_developers_singapore_vpc.id
   cidr_block              = "10.0.3.0/24"
-  availability_zone       = "ap-southeast-1a"
+  availability_zone       = "us-east-1a"
   map_public_ip_on_launch = false
   tags = {
     Name                                   = "unpaid-developers-singapore-private-subnet-1"
@@ -46,7 +46,7 @@ resource "aws_subnet" "unpaid_developers_singapore_private_subnet_1" {
 resource "aws_subnet" "unpaid_developers_singapore_private_subnet_2" {
   vpc_id                  = aws_vpc.unpaid_developers_singapore_vpc.id
   cidr_block              = "10.0.4.0/24"
-  availability_zone       = "ap-southeast-1b"
+  availability_zone       = "us-east-1b"
   map_public_ip_on_launch = false
   tags = {
     Name                                   = "unpaid-developers-singapore-private-subnet-2"
