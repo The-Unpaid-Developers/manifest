@@ -18,7 +18,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "ap-southeast-1"
+  region = "us-east-1"
 }
 
 # allow terraform to authenticate helm with the EKS cluster
