@@ -5,7 +5,7 @@ set -o pipefail  # Prevents errors in a pipeline from being masked
 
 # Variables
 CLUSTER_NAME="unpaid-developers-singapore-eks-cluster"
-REGION="ap-southeast-1"
+REGION="us-east-1"
 NAMESPACE="istio-ingress"
 SECRET_NAME="bchwey-zerossl-tls-secret"
 
