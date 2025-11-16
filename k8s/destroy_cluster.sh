@@ -95,9 +95,41 @@ log_info "Checking for mutating webhooks..."
 delete_webhooks "mutatingwebhookconfigurations"
 
 # ==============================================================================
-# STEP 1.5: Force Delete Kyverno Resources (Prevent Helm Uninstall Deadlock)
+# STEP 1.5: Delete ArgoCD Applications (This deletes actual workloads)
 # ==============================================================================
-log_info "Step 1.5: Force cleaning up Kyverno resources..."
+log_info "Step 1.5: Deleting ArgoCD Applications..."
+
+ARGOCD_APPS=(
+  "chatbot-service"
+  "core-service"
+  "diagram-service"
+  "frontend"
+  "proxy-service"
+  "kyverno-policies"
+)
+
+for app in "${ARGOCD_APPS[@]}"; do
+  log_info "  Deleting ArgoCD Application: $app"
+  kubectl delete application "$app" -n argocd --ignore-not-found=true --wait=false 2>/dev/null || \
+    log_warn "  Application $app not found or already deleted"
+done
+
+log_info "Waiting for ArgoCD to clean up application resources (30s)..."
+sleep 30
+
+# Force delete any stuck ArgoCD application finalizers
+log_info "Checking for stuck ArgoCD applications..."
+for app in "${ARGOCD_APPS[@]}"; do
+  if kubectl get application "$app" -n argocd &>/dev/null; then
+    log_warn "  Application $app is stuck, removing finalizers..."
+    kubectl patch application "$app" -n argocd -p '{"metadata":{"finalizers":null}}' --type=merge 2>/dev/null || true
+  fi
+done
+
+# ==============================================================================
+# STEP 2: Force Delete Kyverno Resources (Prevent Helm Uninstall Deadlock)
+# ==============================================================================
+log_info "Step 2: Force cleaning up Kyverno resources..."
 
 # Delete Kyverno-specific webhooks (these are the main blockers)
 log_info "  Deleting Kyverno webhooks..."
@@ -170,38 +202,6 @@ if kubectl get namespace kyverno &>/dev/null; then
 fi
 
 log_info "  Kyverno cleanup complete"
-
-# ==============================================================================
-# STEP 2: Delete ArgoCD Applications (This deletes actual workloads)
-# ==============================================================================
-log_info "Step 2: Deleting ArgoCD Applications..."
-
-ARGOCD_APPS=(
-  "chatbot-service"
-  "core-service"
-  "diagram-service"
-  "frontend"
-  "proxy-service"
-  "kyverno-policies"
-)
-
-for app in "${ARGOCD_APPS[@]}"; do
-  log_info "  Deleting ArgoCD Application: $app"
-  kubectl delete application "$app" -n argocd --ignore-not-found=true --wait=false 2>/dev/null || \
-    log_warn "  Application $app not found or already deleted"
-done
-
-log_info "Waiting for ArgoCD to clean up application resources (30s)..."
-sleep 30
-
-# Force delete any stuck ArgoCD application finalizers
-log_info "Checking for stuck ArgoCD applications..."
-for app in "${ARGOCD_APPS[@]}"; do
-  if kubectl get application "$app" -n argocd &>/dev/null; then
-    log_warn "  Application $app is stuck, removing finalizers..."
-    kubectl patch application "$app" -n argocd -p '{"metadata":{"finalizers":null}}' --type=merge 2>/dev/null || true
-  fi
-done
 
 # ==============================================================================
 # STEP 3: Force Delete Application Workloads (if ArgoCD didn't clean up)
