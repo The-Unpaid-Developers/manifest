@@ -1,6 +1,0 @@
-namespace: fyp
-images:
-- name: smithquaz/fyp-proxy-service
-  newTag: v1.0.3
-resources:
-- ../../base
