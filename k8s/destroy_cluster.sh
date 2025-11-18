@@ -104,7 +104,6 @@ ARGOCD_APPS=(
   "core-service"
   "diagram-service"
   "frontend"
-  "proxy-service"
   "kyverno-policies"
 )
 
@@ -114,8 +113,8 @@ for app in "${ARGOCD_APPS[@]}"; do
     log_warn "  Application $app not found or already deleted"
 done
 
-log_info "Waiting for ArgoCD to clean up application resources (30s)..."
-sleep 30
+log_info "Waiting for ArgoCD to clean up application resources (15s)..."
+sleep 15
 
 # Force delete any stuck ArgoCD application finalizers
 log_info "Checking for stuck ArgoCD applications..."
@@ -208,7 +207,7 @@ log_info "  Kyverno cleanup complete"
 # ==============================================================================
 log_info "Step 3: Cleaning up application workloads..."
 
-SERVICES=("chatbot-service" "core-service" "diagram-service" "frontend" "proxy-service")
+SERVICES=("chatbot-service" "core-service" "diagram-service" "frontend")
 
 for service in "${SERVICES[@]}"; do
   log_info "  Force deleting workloads for: $service"
