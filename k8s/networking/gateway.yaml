@@ -158,7 +158,9 @@ spec:
   # Catch-all route for frontend - must be LAST since "/" matches all paths
   - name: frontend-route # matched to frontend rollout
     match:
-    - uri:
+    - authority:
+        exact: fyp.bchewy.com
+      uri:
         prefix: "/"
     route:
     - destination:
