@@ -44,6 +44,8 @@ spec:
             secretKeyRef:
               name: openai-secret
               key: api-key
+        - name: CHATBOT_SERVICE_URL
+          value: https://fyp.bchewy.com/chatbot-service/translate/
   strategy:
     canary:
       steps:
