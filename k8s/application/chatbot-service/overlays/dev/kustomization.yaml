@@ -1,6 +1,6 @@
 namespace: fyp
 images:
 - name: smithquaz/fyp-chatbot-service
-  newTag: v1.0.23
+  newTag: v1.0.25
 resources:
 - ../../base
